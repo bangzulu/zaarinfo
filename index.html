@@ -6,12 +6,12 @@
   <title>ZAARINFO — Bläckfisk</title>
   <style>
     :root {
-      --bg:        #181818;
-      --bg-raised: #212121;
-      --border:    #383838;
-      --dim:       #666666;
-      --text:      #c4c4c4;
-      --bright:    #e8e8e8;
+      --bg:        #111111;
+      --bg-raised: #1c1c1c;
+      --border:    #2c2c2c;
+      --dim:       #525252;
+      --text:      #b8b8b8;
+      --bright:    #e2e2e2;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,373 +24,417 @@
       line-height: 1.65;
     }
 
+    /* Subtle scanline overlay */
+    html::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent 0px, transparent 1px,
+        rgba(0,0,0,0.03) 1px, rgba(0,0,0,0.03) 2px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
     body {
       max-width: 80ch;
       margin: 0 auto;
       padding: 1rem 1.25rem 3rem;
     }
 
-    /* ── SCALABLE SECTION DIVIDERS ──────────────────────────── */
-    .sec {
-      display: flex;
-      align-items: center;
-      gap: 1ch;
-      margin: 2.25rem 0 0.75rem;
-      white-space: nowrap;
-      overflow: hidden;
-    }
-    .sec-label {
-      color: var(--bright);
-      font-size: 0.82rem;
-      letter-spacing: 0.12em;
-      flex-shrink: 0;
-    }
-    .sec::before,
-    .sec::after {
-      /* repeating dash that clips to fill available space */
-      content:
-        "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
-        "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ";
-      color: var(--border);
-      overflow: hidden;
-      flex: 1;
-      font-size: 0.82rem;
-    }
-
-    /* ── ASCII ART (fixed-width blocks) ─────────────────────── */
+    /* ── ASCII ART BLOCKS ───────────────────────────────────── */
+    /* Fixed-width pre; scales down via clamp, scrolls if needed */
     .art {
       display: block;
       overflow-x: auto;
       white-space: pre;
-      /* scales with viewport, doesn't wrap, scrolls if needed */
-      font-size: clamp(6px, 1.7vw, 13px);
-      line-height: 1.15;
+      font-size: clamp(6px, 1.65vw, 13px);
+      line-height: 1.2;
       color: var(--dim);
-      padding: 0.5rem 0;
+      padding: 0.4rem 0;
       -webkit-overflow-scrolling: touch;
     }
-    .art-bright { color: var(--text); }
+    .art-text   { color: var(--text); }
+    .art-bright { color: var(--bright); }
+
+    /* ── MAJOR SECTION HEADERS ──────────────────────────────── */
+    /* CSS trick: long repeated ═ string, overflow:hidden clips it */
+    .sec {
+      display: flex;
+      overflow: hidden;
+      white-space: nowrap;
+      align-items: center;
+      margin: 2.75rem 0 1rem;
+      color: var(--dim);
+      font-size: 0.82rem;
+    }
+    .sec::before { content: '╔══╡ '; flex-shrink: 0; }
+    .sec-name    { color: var(--bright); letter-spacing: 0.14em; flex-shrink: 0; }
+    .sec::after  {
+      content: ' ╞══════════════════════════════════════════════════════════════════════════════════════════════════════════════';
+      overflow: hidden;
+      flex: 1;
+    }
+
+    /* ── MINOR SECTION HEADERS (h3) ─────────────────────────── */
+    h3 {
+      display: flex;
+      overflow: hidden;
+      white-space: nowrap;
+      align-items: center;
+      margin: 1.4rem 0 0.45rem;
+      font-size: 0.86rem;
+      font-weight: normal;
+      color: var(--text);
+    }
+    h3::before { content: '├─ '; color: var(--dim); flex-shrink: 0; }
+    h3::after  {
+      content: ' ──────────────────────────────────────────────────────────────────────────────────────────────────────────────';
+      color: var(--border);
+      overflow: hidden;
+      flex: 1;
+    }
 
     /* ── HEADER ─────────────────────────────────────────────── */
-    header { padding: 1.75rem 0 0.5rem; }
+    header { padding: 2rem 0 0; }
 
     .logo {
-      font-size: clamp(1rem, 5vw, 1.6rem);
-      letter-spacing: 0.3em;
+      font-size: clamp(1.1rem, 5vw, 1.75rem);
+      letter-spacing: 0.38em;
       color: var(--bright);
       font-weight: bold;
     }
+    .cursor {
+      display: inline-block;
+      width: 0.55em;
+      height: 1em;
+      background: var(--bright);
+      vertical-align: text-bottom;
+      margin-left: 3px;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
     .tagline {
       color: var(--dim);
-      font-size: 0.78rem;
-      letter-spacing: 0.18em;
-      margin-top: 0.2rem;
+      font-size: 0.76rem;
+      letter-spacing: 0.2em;
+      margin-top: 0.3rem;
     }
 
     /* ── NAV ────────────────────────────────────────────────── */
     nav {
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 0.4rem 0;
-      margin: 0.75rem 0 1.5rem;
+      margin: 1rem 0 1.75rem;
       font-size: 0.82rem;
-    }
-    nav a {
       color: var(--dim);
-      text-decoration: none;
-      margin-right: 1.5ch;
+      overflow: hidden;
+      white-space: nowrap;
     }
-    nav a:hover { color: var(--bright); }
+    .prompt { color: var(--dim); }
+    nav a { color: var(--text); text-decoration: none; }
+    nav a:hover { color: var(--bright); text-decoration: underline; }
+    .sep { margin: 0 0.6ch; color: var(--border); }
 
     /* ── TYPOGRAPHY ─────────────────────────────────────────── */
-    h1 { font-size: clamp(1.1rem, 3.5vw, 1.5rem); color: var(--bright); letter-spacing: 0.08em; margin-bottom: 0.2rem; }
-    h2 { font-size: 1rem; color: var(--bright); letter-spacing: 0.08em; margin: 1.25rem 0 0.4rem; }
-    h3 { font-size: 0.9rem; color: var(--text); margin: 1rem 0 0.3rem; }
-    p  { margin: 0.6rem 0; }
-    em { color: var(--bright); font-style: italic; }
+    h1 {
+      font-size: clamp(1.15rem, 3.5vw, 1.55rem);
+      color: var(--bright);
+      letter-spacing: 0.06em;
+      font-weight: normal;
+      margin-bottom: 0.15rem;
+    }
+    h1::before { content: '# '; color: var(--dim); }
 
-    ul { list-style: none; padding-left: 2ch; margin: 0.5rem 0; }
-    ul li::before { content: "> "; color: var(--dim); }
-    ul li { margin: 0.2rem 0; }
+    h2 {
+      font-size: 0.95rem;
+      color: var(--bright);
+      letter-spacing: 0.1em;
+      font-weight: normal;
+      margin: 1.75rem 0 0.5rem;
+    }
+
+    p   { margin: 0.65rem 0; }
+    em  { color: var(--bright); font-style: normal; }
+
+    ul  { list-style: none; padding-left: 2ch; margin: 0.5rem 0; }
+    li  { margin: 0.25rem 0; }
+    li::before { content: '▸ '; color: var(--dim); }
 
     /* ── INFOBOX ────────────────────────────────────────────── */
     .infobox {
+      float: right;
+      max-width: min(100%, 25ch);
+      margin: 0.25rem 0 1rem 1.5rem;
       border: 1px solid var(--border);
       background: var(--bg-raised);
-      padding: 0;
-      margin: 0 0 1rem 1.5rem;
-      float: right;
-      max-width: min(100%, 26ch);
-      font-size: 0.8rem;
+      font-size: 0.79rem;
+      overflow: hidden;
     }
-    .infobox-title {
+    .ib-title {
       background: var(--border);
       color: var(--bright);
       padding: 0.3rem 0.7rem;
-      letter-spacing: 0.1em;
-      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      font-size: 0.75rem;
     }
-    .infobox-row {
+    .ib-row {
       display: flex;
       border-bottom: 1px solid var(--bg);
-      padding: 0.2rem 0.7rem;
+      padding: 0.22rem 0.7rem;
     }
-    .infobox-key { color: var(--dim); width: 11ch; flex-shrink: 0; }
-    .infobox-val { color: var(--text); }
+    .ib-k { color: var(--dim); width: 10ch; flex-shrink: 0; }
+    .ib-v { color: var(--text); }
 
-    @media (max-width: 42ch) {
+    @media (max-width: 44ch) {
       .infobox { float: none; max-width: 100%; margin-left: 0; }
     }
 
-    /* ── IMAGE ──────────────────────────────────────────────── */
+    /* ── IMAGE BLOCK ────────────────────────────────────────── */
     .img-block {
-      margin: 1.5rem 0;
+      display: block;
+      margin: 1.75rem 0;
       border: 1px solid var(--border);
       background: var(--bg-raised);
-      max-width: 100%;
-      display: inline-block;
+      overflow: hidden;
     }
-    .img-block-bar {
+    .img-bar {
       background: var(--border);
       color: var(--dim);
       font-size: 0.72rem;
-      padding: 0.25rem 0.6rem;
-      letter-spacing: 0.05em;
+      padding: 0.28rem 0.7rem;
+      white-space: nowrap;
+      overflow: hidden;
     }
+    .img-bar b { color: var(--bright); font-weight: normal; }
     .img-block img {
       display: block;
-      max-width: 100%;
+      width: 100%;
       height: auto;
-      filter: grayscale(15%) contrast(1.05);
+      filter: grayscale(20%) contrast(1.05);
     }
-    .img-block-cap {
+    .img-cap {
       color: var(--dim);
-      font-size: 0.78rem;
-      padding: 0.35rem 0.6rem;
+      font-size: 0.74rem;
+      padding: 0.3rem 0.7rem;
       border-top: 1px solid var(--border);
     }
-    .img-block-cap::before { content: "// "; }
+    .img-cap::before { content: '└ '; }
 
-    /* ── DATA / CALLOUT ─────────────────────────────────────── */
-    .callout {
-      border-left: 2px solid var(--border);
+    /* ── NOTE / CALLOUT ─────────────────────────────────────── */
+    .note {
+      margin: 1.1rem 0;
+      padding: 0.55rem 0.9rem;
+      border-left: 2px solid var(--dim);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
       background: var(--bg-raised);
-      padding: 0.6rem 1rem;
-      margin: 1rem 0;
+      font-size: 0.85rem;
       color: var(--text);
-      font-size: 0.88rem;
+    }
+    .note-label {
+      font-size: 0.7rem;
+      color: var(--dim);
+      letter-spacing: 0.2em;
+      margin-bottom: 0.3rem;
     }
 
     /* ── FOOTER ─────────────────────────────────────────────── */
     footer {
-      margin-top: 3rem;
-      border-top: 1px solid var(--border);
-      padding-top: 1rem;
+      margin-top: 3.5rem;
       color: var(--dim);
-      font-size: 0.78rem;
+      font-size: 0.76rem;
     }
-    footer p { margin: 0.2rem 0; }
+    .foot-rule {
+      display: block;
+      overflow: hidden;
+      white-space: nowrap;
+      color: var(--border);
+      margin-bottom: 0.7rem;
+      line-height: 1;
+    }
+    .foot-rule::before {
+      content: '════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════';
+    }
+    footer p { margin: 0.15rem 0; }
   </style>
 </head>
 <body>
 
 <!-- ══ HEADER ══════════════════════════════════════════════════ -->
 <header>
-<pre class="art art-bright">
- ____  ____  ____  ____  _  _  ____  ___
-|_   ||  _ ||  _ ||_   || \| ||  __||   |
-  | | || |/ || |/ | _| || |\ || |__ | | |
-  |_| ||____||____||____||_| \||____|`---'
-</pre>
-  <div class="tagline">// kunskap :: text :: hastighet //</div>
+  <div class="logo">ZAARINFO<span class="cursor"></span></div>
+  <div class="tagline">kunskap  ·  text  ·  hastighet</div>
 </header>
 
 <nav>
-  <a href="#">[hem]</a>
-  <a href="#">[artiklar]</a>
-  <a href="#">[sök]</a>
-  <a href="#">[om]</a>
+  <span class="prompt">~/zaarinfo $&nbsp;</span><a href="#">hem</a><span class="sep">/</span><a href="#">artiklar</a><span class="sep">/</span><a href="#">sök</a><span class="sep">/</span><a href="#">om</a>
 </nav>
 
 <!-- ══ ARTICLE ═════════════════════════════════════════════════ -->
 <article>
 
-  <div class="sec"><span class="sec-label">[ BLÄCKFISK ]</span></div>
+<div class="sec"><span class="sec-name">BLÄCKFISK</span></div>
 
-  <h1>Bläckfisk</h1>
-  <p><em>Octopoda</em> — ordning inom bläckfotingar (Cephalopoda)</p>
+<h1>Bläckfisk</h1>
+<p><em>Octopoda</em> — ordning inom bläckfotingar (Cephalopoda)</p>
 
-  <!-- INFOBOX -->
-  <div class="infobox">
-    <div class="infobox-title">[ KLASSIFIKATION ]</div>
-    <div class="infobox-row"><span class="infobox-key">Rike</span><span class="infobox-val">Animalia</span></div>
-    <div class="infobox-row"><span class="infobox-key">Stam</span><span class="infobox-val">Mollusca</span></div>
-    <div class="infobox-row"><span class="infobox-key">Klass</span><span class="infobox-val">Cephalopoda</span></div>
-    <div class="infobox-row"><span class="infobox-key">Ordning</span><span class="infobox-val">Octopoda</span></div>
-    <div class="infobox-row"><span class="infobox-key">Arter</span><span class="infobox-val">~300</span></div>
-    <div class="infobox-row"><span class="infobox-key">Armar</span><span class="infobox-val">8</span></div>
-    <div class="infobox-row"><span class="infobox-key">Hjärtan</span><span class="infobox-val">3</span></div>
-    <div class="infobox-row"><span class="infobox-key">Blodtyp</span><span class="infobox-val">Blått (hemocyanin)</span></div>
-    <div class="infobox-row"><span class="infobox-key">Livslängd</span><span class="infobox-val">1–5 år</span></div>
-  </div>
+<!-- INFOBOX -->
+<div class="infobox">
+  <div class="ib-title">KLASSIFIKATION</div>
+  <div class="ib-row"><span class="ib-k">Rike</span><span class="ib-v">Animalia</span></div>
+  <div class="ib-row"><span class="ib-k">Stam</span><span class="ib-v">Mollusca</span></div>
+  <div class="ib-row"><span class="ib-k">Klass</span><span class="ib-v">Cephalopoda</span></div>
+  <div class="ib-row"><span class="ib-k">Ordning</span><span class="ib-v">Octopoda</span></div>
+  <div class="ib-row"><span class="ib-k">Arter</span><span class="ib-v">~300</span></div>
+  <div class="ib-row"><span class="ib-k">Armar</span><span class="ib-v">8</span></div>
+  <div class="ib-row"><span class="ib-k">Hjärtan</span><span class="ib-v">3</span></div>
+  <div class="ib-row"><span class="ib-k">Blod</span><span class="ib-v">Blått</span></div>
+  <div class="ib-row"><span class="ib-k">Livslängd</span><span class="ib-v">1–5 år</span></div>
+</div>
 
-  <p>
-    Bläckfiskar tillhör ordningen <em>Octopoda</em> och är mjukkroppade, åttaarmade blötdjur.
-    De lever uteslutande i saltvatten och återfinns i alla världshav — från grunda korallrev
-    ned till djuphavets bottnar.
-  </p>
+<p>
+  Bläckfiskar tillhör ordningen <em>Octopoda</em> och är mjukkroppade, åttaarmade
+  blötdjur. De lever uteslutande i saltvatten och återfinns i alla världshav —
+  från grunda korallrev ned till djuphavets bottnar.
+</p>
+<p>
+  Med tre hjärtan, blått blod och förmågan att lösa komplexa problem räknas
+  bläckfisken som ett av de intelligentaste ryggradslösa djuren. De kan öppna
+  burklock, lära sig via observation och använda verktyg.
+</p>
 
-  <p>
-    Med tre hjärtan, blått blod och förmågan att lösa komplexa problem räknas bläckfisken
-    som ett av de intelligentaste ryggradslösa djuren. De kan öppna burklock, lära sig
-    via observation och använda verktyg.
-  </p>
-
-  <!-- ASCII octopus -->
+<!-- ASCII octopus -->
 <pre class="art">
-                   .
-            __   _(|)_   __
-          _(  )_(   )_(  )_
-         (  )(  ) (_) (  )(  )
-          `--'  `-----'  `--'
-           |  .-'     `-.  |
-           | /  O     O  \ |
-           ||    (---)    ||
-           |`--._______.--'|
-            \             /
-         .--'`-.       .-'`--.
-        /   __  `.   .'  __   \
-       |   /  \   | |   /  \   |
-        \ /    \ / | \ /    \ /
-        _|      |_   _|      |_
-       / |      | \ / |      | \
+            .---.
+          .'     '.
+         /  .- -.  \
+        |  ( o o )  |
+        |   '---'   |
+         \ '-----' /
+    _..-' '-._____.-' '-.._
+   /    / |           | \    \
+  | \  /  |           |  \  / |
+  |  \/   |           |   \/  |
+   \  \__/             \__/  /
+    '--'                 '--'
 </pre>
 
-  <!-- IMAGE -->
-  <div class="img-block">
-    <div class="img-block-bar">[img] Octopus_vulgaris2.jpg — Wikipedia / CC BY-SA</div>
-    <img
-      src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Octopus_vulgaris2.jpg/640px-Octopus_vulgaris2.jpg"
-      alt="Octopus vulgaris i sitt naturliga habitat"
-      width="640"
-      height="426"
-      loading="lazy"
-    >
-    <div class="img-block-cap">Octopus vulgaris. Foto: Albert Kok</div>
-  </div>
+<!-- IMAGE -->
+<div class="img-block">
+  <div class="img-bar">FILE <b>Octopus_vulgaris2.jpg</b>  640×426  CC BY-SA</div>
+  <img
+    src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Octopus_vulgaris2.jpg/640px-Octopus_vulgaris2.jpg"
+    alt="Octopus vulgaris i sitt naturliga habitat"
+    width="640" height="426" loading="lazy"
+  >
+  <div class="img-cap">Octopus vulgaris. Foto: Albert Kok</div>
+</div>
 
-  <!-- ── ANATOMI ───────────────────────────────────────────── -->
-  <div class="sec"><span class="sec-label">[ ANATOMI ]</span></div>
-  <h2>Anatomi</h2>
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="sec"><span class="sec-name">ANATOMI</span></div>
 
-  <p>
-    Bläckfiskens kropp saknar inre skelett — med undantag för en rudimentär kitin-platta
-    hos vissa arter. Manteln, en muskulös säck, omsluter de inre organen och förbinder
-    sig med ett huvud och åtta suputrustade armar.
-  </p>
+<p>
+  Bläckfiskens kropp saknar inre skelett — med undantag för en rudimentär
+  kitin-platta hos vissa arter. Manteln, en muskulös säck, omsluter de inre
+  organen och förbinder sig med ett huvud och åtta sugkoppsförsedda armar.
+</p>
 
-  <h3>Cirkulationssystem</h3>
-  <p>
-    Tre hjärtan driver cirkulationen: två grälhjärtan pumpar blod genom gälarna och ett
-    systemhjärta fördelar det syresatta blodet. Blodet innehåller <em>hemocyanin</em>,
-    ett kopparbaserat syreprotein som gör det blått.
-  </p>
+<h3>Cirkulationssystem</h3>
+<p>
+  Tre hjärtan driver cirkulationen: två grälhjärtan pumpar blod genom gälarna
+  och ett systemhjärta fördelar det syresatta blodet. Blodet innehåller
+  <em>hemocyanin</em> — ett kopparbaserat syreprotein som ger det dess
+  karakteristiska blå färg.
+</p>
 
-  <h3>Nervsystem</h3>
-  <p>
-    Ungefär 500 miljoner neuroner — varav 2/3 sitter i armarna. Varje arm kan agera
-    delvis självständigt utan direkt styrning från hjärnan.
-  </p>
+<h3>Nervsystem</h3>
+<p>
+  Ungefär 500 miljoner neuroner — varav 2/3 sitter i armarna. Varje arm kan
+  agera delvis självständigt utan direkt styrning från hjärnan.
+</p>
 
-  <div class="callout">
-    Jämförelse: en honungsbi har ~960 000 neuroner.
-    En bläckfisk har alltså ~500× fler.
-  </div>
+<div class="note">
+  <div class="note-label">JÄMFÖRELSE</div>
+  En honungsbi har ~960 000 neuroner.
+  En bläckfisk har alltså ~500× fler.
+</div>
 
-  <!-- ── INTELLIGENS ───────────────────────────────────────── -->
-  <div class="sec"><span class="sec-label">[ INTELLIGENS ]</span></div>
-  <h2>Intelligens & Beteende</h2>
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="sec"><span class="sec-name">INTELLIGENS</span></div>
 
-  <p>Dokumenterade kognitiva beteenden:</p>
-  <ul>
-    <li>Löser labyrintpussel och skruvkorkar</li>
-    <li>Känner igen individuella människor</li>
-    <li>Använder kokosnötsskal som bärbart skydd (verktygsbeteende)</li>
-    <li>Lär sig via observation av artfränder</li>
-    <li>Visar tecken på lek och nyfikenhet</li>
-  </ul>
+<p>Dokumenterade kognitiva beteenden:</p>
+<ul>
+  <li>Löser labyrintpussel och öppnar skruvkorkar</li>
+  <li>Känner igen individuella människor</li>
+  <li>Använder kokosnötsskal som bärbart skydd — verktygsbeteende</li>
+  <li>Lär sig uppgifter via observation av artfränder</li>
+  <li>Visar tecken på lek och nyfikenhet</li>
+</ul>
 
-  <!-- ── KAMOUFLAGE ────────────────────────────────────────── -->
-  <div class="sec"><span class="sec-label">[ KAMOUFLAGE ]</span></div>
-  <h2>Kamouflage</h2>
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="sec"><span class="sec-name">KAMOUFLAGE</span></div>
 
-  <p>
-    Via <em>kromatoforer</em> — pigmentfyllda celler i huden — kan bläckfisken ändra
-    färg och mönster på millisekunder. Papiller i huden förändrar dessutom textur:
-    från slät till taggig för att matcha korall, sand eller sten.
-  </p>
+<p>
+  Via <em>kromatoforer</em> — pigmentfyllda celler i huden — kan bläckfisken
+  ändra färg och mönster på millisekunder. Papiller i huden förändrar dessutom
+  textur från slät till taggig för att matcha korall, sand eller sten.
+</p>
 
-  <!-- IMAGE: camouflage -->
-  <div class="img-block">
-    <div class="img-block-bar">[img] Octopus_cyanea_camouflage.jpg — Wikipedia / CC BY</div>
-    <img
-      src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Octopus_cyanea_camouflage.jpg/800px-Octopus_cyanea_camouflage.jpg"
-      alt="Octopus cyanea kamouflerar sig mot korallrevet"
-      width="800"
-      height="533"
-      loading="lazy"
-    >
-    <div class="img-block-cap">Octopus cyanea kamouflerad mot rev. Foto: prilfish / CC BY</div>
-  </div>
+<div class="img-block">
+  <div class="img-bar">FILE <b>Octopus_cyanea_camouflage.jpg</b>  800×533  CC BY</div>
+  <img
+    src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Octopus_cyanea_camouflage.jpg/800px-Octopus_cyanea_camouflage.jpg"
+    alt="Octopus cyanea kamouflerar sig mot korallrevet"
+    width="800" height="533" loading="lazy"
+  >
+  <div class="img-cap">Octopus cyanea kamouflerad mot rev. Foto: prilfish</div>
+</div>
 
-  <p>
-    Paradoxalt nog verkar bläckfiskar vara <em>färgblinda</em> — de har bara en typ av
-    fotoreceptor. En hypotes: de utnyttjar kromatisk aberration i linsen för att ändå
-    uppfatta färgskillnader.
-  </p>
+<p>
+  Paradoxalt nog verkar bläckfiskar vara <em>färgblinda</em> — de har bara en
+  typ av fotoreceptor. En hypotes är att de utnyttjar kromatisk aberration i
+  linsen för att ändå uppfatta färgskillnader.
+</p>
 
-  <!-- ── REPRODUKTION ──────────────────────────────────────── -->
-  <div class="sec"><span class="sec-label">[ REPRODUKTION ]</span></div>
-  <h2>Reproduktion</h2>
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="sec"><span class="sec-name">REPRODUKTION</span></div>
 
-  <p>
-    Bläckfiskar är solitära och möts bara för parning. Hanen överför spermiepaket
-    via <em>hectocotylus</em>, en specialiserad arm. Honan lägger tiotusentals ägg,
-    vaktar och syresätter dem — utan att äta — tills de kläcks.
-    Hon dör kort därefter.
-  </p>
+<p>
+  Bläckfiskar är solitära och möts bara för parning. Hanen överför spermiepaket
+  via <em>hectocotylus</em>, en specialiserad arm. Honan lägger tiotusentals
+  ägg, vaktar och syresätter dem utan att äta tills de kläcks.
+  Hon dör kort därefter.
+</p>
 
-  <!-- ── UTBREDNING ────────────────────────────────────────── -->
-  <div class="sec"><span class="sec-label">[ UTBREDNING ]</span></div>
-  <h2>Utbredning & Djupzoner</h2>
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="sec"><span class="sec-name">UTBREDNING</span></div>
 
-  <p>
-    Bläckfiskar finns i alla oceaner, på alla djup.
-    <em>Mimic octopus</em> kan imitera giftiga djur som havsorm och plattfisk.
-    <em>Blåringebläckfisken</em> är ett av havsdjurens giftigaste — dödlig för
-    människa på minuter.
-  </p>
+<p>
+  Bläckfiskar finns i alla oceaner, på alla djup. <em>Mimic octopus</em> kan
+  imitera giftiga djur som havsorm och plattfisk. <em>Blåringebläckfisken</em>
+  är ett av havsdjurens giftigaste — dödlig för människa på minuter.
+</p>
 
-<pre class="art art-bright">
-  Djupzon-fördelning
+<pre class="art art-text">
+  DJUPZON-FÖRDELNING
+  ───────────────────────────────────────────
 
-  0 m    ####################################  Tidvattenzon
-  200 m  ###########################           Epipelagisk
-  1000 m ################                      Mesopelagisk
-  2000 m ##########                            Bathypelagisk
-  4000 m #####                                 Abyssopelagisk
-  6000 m ##                                    Hadal
+     0 m   ████████████████████████████████  Tidvattenzon
+   200 m   ████████████████████████          Epipelagisk
+  1000 m   ████████████████                  Mesopelagisk
+  2000 m   ██████████                        Bathypelagisk
+  4000 m   █████                             Abyssopelagisk
+  6000 m   ██                                Hadal
 </pre>
 
 </article>
 
 <!-- ══ FOOTER ══════════════════════════════════════════════════ -->
 <footer>
-<pre class="art">
-+--------------------------------------------------+
-|  ZAARINFO  ::  textbaserat  ::  snabbt  ::  fritt  |
-+--------------------------------------------------+
-</pre>
+  <span class="foot-rule"></span>
+  <p>ZAARINFO  ·  textbaserat  ·  snabbt  ·  fritt</p>
   <p>Källa: Wikipedia — Octopus (CC BY-SA)</p>
   <p>Senast uppdaterad: 2026-04-04</p>
 </footer>
