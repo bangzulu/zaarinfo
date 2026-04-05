@@ -9,9 +9,9 @@
       --bg:        #111111;
       --bg-raised: #1c1c1c;
       --border:    #2c2c2c;
-      --dim:       #525252;
-      --text:      #b8b8b8;
-      --bright:    #e2e2e2;
+      --dim:       #828282;  /* WCAG AA på --bg: ~4.8:1 */
+      --text:      #c0c0c0;  /* WCAG AAA på --bg: ~10.4:1 */
+      --bright:    #e8e8e8;  /* WCAG AAA på --bg: ~15.6:1 */
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,11 +20,11 @@
       background: var(--bg);
       color: var(--text);
       font-family: 'Courier New', Courier, monospace;
-      font-size: 14px;
+      font-size: 15px;
       line-height: 1.65;
     }
 
-    /* Subtle scanline overlay */
+    /* Subtila scanlines */
     html::after {
       content: '';
       position: fixed;
@@ -44,8 +44,8 @@
       padding: 1rem 1.25rem 3rem;
     }
 
-    /* ── ASCII ART BLOCKS ───────────────────────────────────── */
-    /* Fixed-width pre; scales down via clamp, scrolls if needed */
+    /* ── ASCII ART BLOCK ────────────────────────────────────── */
+    /* Skalas med clamp, scrollar horisontellt om nödvändigt    */
     .art {
       display: block;
       overflow-x: auto;
@@ -59,8 +59,8 @@
     .art-text   { color: var(--text); }
     .art-bright { color: var(--bright); }
 
-    /* ── MAJOR SECTION HEADERS ──────────────────────────────── */
-    /* CSS trick: long repeated ═ string, overflow:hidden clips it */
+    /* ── SEKTIONSRUBRIKER (skalas via CSS-trick) ────────────── */
+    /* Lång ═-sträng klipps av overflow:hidden — fyller bredden */
     .sec {
       display: flex;
       overflow: hidden;
@@ -73,25 +73,25 @@
     .sec::before { content: '╔══╡ '; flex-shrink: 0; }
     .sec-name    { color: var(--bright); letter-spacing: 0.14em; flex-shrink: 0; }
     .sec::after  {
-      content: ' ╞══════════════════════════════════════════════════════════════════════════════════════════════════════════════';
+      content: ' ╞═══════════════════════════════════════════════════════════════════════════════════════════════════════';
       overflow: hidden;
       flex: 1;
     }
 
-    /* ── MINOR SECTION HEADERS (h3) ─────────────────────────── */
+    /* ── UNDERRUBRIKER h3 ───────────────────────────────────── */
     h3 {
       display: flex;
       overflow: hidden;
       white-space: nowrap;
       align-items: center;
       margin: 1.4rem 0 0.45rem;
-      font-size: 0.86rem;
+      font-size: 0.88rem;
       font-weight: normal;
       color: var(--text);
     }
     h3::before { content: '├─ '; color: var(--dim); flex-shrink: 0; }
     h3::after  {
-      content: ' ──────────────────────────────────────────────────────────────────────────────────────────────────────────────';
+      content: ' ─────────────────────────────────────────────────────────────────────────────────────────────────────────';
       color: var(--border);
       overflow: hidden;
       flex: 1;
@@ -100,44 +100,40 @@
     /* ── HEADER ─────────────────────────────────────────────── */
     header { padding: 2rem 0 0; }
 
-    .logo {
-      font-size: clamp(1.1rem, 5vw, 1.75rem);
-      letter-spacing: 0.38em;
+    .logo-art {
+      display: block;
+      overflow-x: auto;
+      white-space: pre;
+      font-size: clamp(7px, 1.9vw, 14px);
+      line-height: 1.2;
       color: var(--bright);
-      font-weight: bold;
+      -webkit-overflow-scrolling: touch;
     }
+
     .cursor {
       display: inline-block;
-      width: 0.55em;
+      width: 0.65em;
       height: 1em;
       background: var(--bright);
       vertical-align: text-bottom;
-      margin-left: 3px;
       animation: blink 1s step-end infinite;
+      margin-left: 1px;
     }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-
-    .tagline {
-      color: var(--dim);
-      font-size: 0.76rem;
-      letter-spacing: 0.2em;
-      margin-top: 0.3rem;
-    }
 
     /* ── NAV ────────────────────────────────────────────────── */
     nav {
       margin: 1rem 0 1.75rem;
       font-size: 0.82rem;
       color: var(--dim);
-      overflow: hidden;
       white-space: nowrap;
+      overflow: hidden;
     }
-    .prompt { color: var(--dim); }
     nav a { color: var(--text); text-decoration: none; }
     nav a:hover { color: var(--bright); text-decoration: underline; }
     .sep { margin: 0 0.6ch; color: var(--border); }
 
-    /* ── TYPOGRAPHY ─────────────────────────────────────────── */
+    /* ── TYPOGRAFI ──────────────────────────────────────────── */
     h1 {
       font-size: clamp(1.15rem, 3.5vw, 1.55rem);
       color: var(--bright);
@@ -148,7 +144,7 @@
     h1::before { content: '# '; color: var(--dim); }
 
     h2 {
-      font-size: 0.95rem;
+      font-size: 0.97rem;
       color: var(--bright);
       letter-spacing: 0.1em;
       font-weight: normal;
@@ -162,89 +158,76 @@
     li  { margin: 0.25rem 0; }
     li::before { content: '▸ '; color: var(--dim); }
 
-    /* ── INFOBOX ────────────────────────────────────────────── */
-    .infobox {
+    /* ── INFOBOX — ren ASCII art pre ────────────────────────── */
+    .infobox-wrap {
       float: right;
-      max-width: min(100%, 25ch);
       margin: 0.25rem 0 1rem 1.5rem;
-      border: 1px solid var(--border);
-      background: var(--bg-raised);
-      font-size: 0.79rem;
-      overflow: hidden;
+      line-height: 1;
     }
-    .ib-title {
-      background: var(--border);
-      color: var(--bright);
-      padding: 0.3rem 0.7rem;
-      letter-spacing: 0.12em;
-      font-size: 0.75rem;
-    }
-    .ib-row {
-      display: flex;
-      border-bottom: 1px solid var(--bg);
-      padding: 0.22rem 0.7rem;
-    }
-    .ib-k { color: var(--dim); width: 10ch; flex-shrink: 0; }
-    .ib-v { color: var(--text); }
-
-    @media (max-width: 44ch) {
-      .infobox { float: none; max-width: 100%; margin-left: 0; }
+    @media (max-width: 46ch) {
+      .infobox-wrap { float: none; margin-left: 0; margin-bottom: 1rem; }
     }
 
-    /* ── IMAGE BLOCK ────────────────────────────────────────── */
+    /* ── BILDBLOCK ──────────────────────────────────────────── */
     .img-block {
       display: block;
       margin: 1.75rem 0;
-      border: 1px solid var(--border);
-      background: var(--bg-raised);
       overflow: hidden;
     }
-    .img-bar {
-      background: var(--border);
-      color: var(--dim);
-      font-size: 0.72rem;
-      padding: 0.28rem 0.7rem;
+    /* ╔═[ filnamn ... ]═══════════════╗  — skalas via flex+overflow */
+    .img-top, .img-bot {
+      display: flex;
+      overflow: hidden;
       white-space: nowrap;
-      overflow: hidden;
+      font-size: 0.76rem;
+      color: var(--dim);
+      line-height: 1.65;
+      background: var(--bg-raised);
     }
-    .img-bar b { color: var(--bright); font-weight: normal; }
+    .img-top::before { content: '╔═[ '; flex-shrink: 0; }
+    .img-top b       { color: var(--bright); font-weight: normal; flex-shrink: 0; }
+    .img-top::after  {
+      content: ' ]═════════════════════════════════════════════════════════════════════════════╗';
+      flex: 1; overflow: hidden;
+    }
     .img-block img {
       display: block;
       width: 100%;
       height: auto;
       filter: grayscale(20%) contrast(1.05);
     }
-    .img-cap {
-      color: var(--dim);
-      font-size: 0.74rem;
-      padding: 0.3rem 0.7rem;
-      border-top: 1px solid var(--border);
+    .img-bot::before { content: '╚═[ '; flex-shrink: 0; }
+    .img-bot span    { color: var(--text); flex-shrink: 0; }
+    .img-bot::after  {
+      content: ' ]═════════════════════════════════════════════════════════════════════════════╝';
+      flex: 1; overflow: hidden;
     }
-    .img-cap::before { content: '└ '; }
 
     /* ── NOTE / CALLOUT ─────────────────────────────────────── */
     .note {
       margin: 1.1rem 0;
-      padding: 0.55rem 0.9rem;
-      border-left: 2px solid var(--dim);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
+      border: 1px solid var(--border);
       background: var(--bg-raised);
-      font-size: 0.85rem;
-      color: var(--text);
+      overflow: hidden;
     }
-    .note-label {
-      font-size: 0.7rem;
-      color: var(--dim);
+    .note-head {
+      background: var(--border);
+      color: var(--bright);
+      padding: 0.22rem 0.7rem;
+      font-size: 0.74rem;
       letter-spacing: 0.2em;
-      margin-bottom: 0.3rem;
+    }
+    .note-body {
+      padding: 0.5rem 0.8rem;
+      font-size: 0.86rem;
+      color: var(--text);
     }
 
     /* ── FOOTER ─────────────────────────────────────────────── */
     footer {
       margin-top: 3.5rem;
       color: var(--dim);
-      font-size: 0.76rem;
+      font-size: 0.78rem;
     }
     .foot-rule {
       display: block;
@@ -264,15 +247,17 @@
 
 <!-- ══ HEADER ══════════════════════════════════════════════════ -->
 <header>
-  <div class="logo">ZAARINFO<span class="cursor"></span></div>
-  <div class="tagline">kunskap  ·  text  ·  hastighet</div>
+<pre class="logo-art"> ____  ____  ____  ____  _  _  ____  ___
+|_   ||  _ ||  _ ||_   || \| ||  __||   |
+  | | || |/ || |/ | _| || |\ || |__ | | |
+  |_| ||____||____||____||_| \||____|`---'<span class="cursor"></span></pre>
 </header>
 
 <nav>
-  <span class="prompt">~/zaarinfo $&nbsp;</span><a href="#">hem</a><span class="sep">/</span><a href="#">artiklar</a><span class="sep">/</span><a href="#">sök</a><span class="sep">/</span><a href="#">om</a>
+  <span style="color:var(--dim)">~/zaarinfo&nbsp;$&nbsp;</span><a href="#">hem</a><span class="sep">/</span><a href="#">artiklar</a><span class="sep">/</span><a href="#">sök</a><span class="sep">/</span><a href="#">om</a>
 </nav>
 
-<!-- ══ ARTICLE ═════════════════════════════════════════════════ -->
+<!-- ══ ARTIKEL ═════════════════════════════════════════════════ -->
 <article>
 
 <div class="sec"><span class="sec-name">BLÄCKFISK</span></div>
@@ -280,18 +265,21 @@
 <h1>Bläckfisk</h1>
 <p><em>Octopoda</em> — ordning inom bläckfotingar (Cephalopoda)</p>
 
-<!-- INFOBOX -->
-<div class="infobox">
-  <div class="ib-title">KLASSIFIKATION</div>
-  <div class="ib-row"><span class="ib-k">Rike</span><span class="ib-v">Animalia</span></div>
-  <div class="ib-row"><span class="ib-k">Stam</span><span class="ib-v">Mollusca</span></div>
-  <div class="ib-row"><span class="ib-k">Klass</span><span class="ib-v">Cephalopoda</span></div>
-  <div class="ib-row"><span class="ib-k">Ordning</span><span class="ib-v">Octopoda</span></div>
-  <div class="ib-row"><span class="ib-k">Arter</span><span class="ib-v">~300</span></div>
-  <div class="ib-row"><span class="ib-k">Armar</span><span class="ib-v">8</span></div>
-  <div class="ib-row"><span class="ib-k">Hjärtan</span><span class="ib-v">3</span></div>
-  <div class="ib-row"><span class="ib-k">Blod</span><span class="ib-v">Blått</span></div>
-  <div class="ib-row"><span class="ib-k">Livslängd</span><span class="ib-v">1–5 år</span></div>
+<!-- INFOBOX — ren pre/ASCII art, demoscene-stil -->
+<div class="infobox-wrap">
+<pre class="art art-text">&#x2554;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2557;
+&#x2551;  KLASSIFIKATION        &#x2551;
+&#x2560;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2563;
+&#x2551; Rike    : Animalia     &#x2551;
+&#x2551; Stam    : Mollusca     &#x2551;
+&#x2551; Klass   : Cephalopoda  &#x2551;
+&#x2551; Ordning : Octopoda     &#x2551;
+&#x2551; Arter   : ~300 spp.    &#x2551;
+&#x2551; Armar   : 8            &#x2551;
+&#x2551; Hjartan : 3            &#x2551;
+&#x2551; Blod    : Blatt (Cu)   &#x2551;
+&#x2551; Livsl.  : 1-5 ar       &#x2551;
+&#x255A;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x255D;</pre>
 </div>
 
 <p>
@@ -305,7 +293,7 @@
   burklock, lära sig via observation och använda verktyg.
 </p>
 
-<!-- ASCII octopus -->
+<!-- ASCII-bläckfisk -->
 <pre class="art">
             .---.
           .'     '.
@@ -321,15 +309,15 @@
     '--'                 '--'
 </pre>
 
-<!-- IMAGE -->
+<!-- BILD 1 -->
 <div class="img-block">
-  <div class="img-bar">FILE <b>Octopus_vulgaris2.jpg</b>  640×426  CC BY-SA</div>
+  <div class="img-top"><b>Octopus_vulgaris2.jpg</b>&nbsp;&nbsp;640x426&nbsp;&nbsp;CC BY-SA</div>
   <img
     src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Octopus_vulgaris2.jpg/640px-Octopus_vulgaris2.jpg"
     alt="Octopus vulgaris i sitt naturliga habitat"
     width="640" height="426" loading="lazy"
   >
-  <div class="img-cap">Octopus vulgaris. Foto: Albert Kok</div>
+  <div class="img-bot"><span>Octopus vulgaris. Foto: Albert Kok</span></div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════ -->
@@ -356,9 +344,11 @@
 </p>
 
 <div class="note">
-  <div class="note-label">JÄMFÖRELSE</div>
-  En honungsbi har ~960 000 neuroner.
-  En bläckfisk har alltså ~500× fler.
+  <div class="note-head">JAMFORELSE</div>
+  <div class="note-body">
+    En honungsbi har ~960 000 neuroner.<br>
+    En blackfisk har alltsa ~500x fler.
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════ -->
@@ -382,20 +372,21 @@
   textur från slät till taggig för att matcha korall, sand eller sten.
 </p>
 
+<!-- BILD 2 -->
 <div class="img-block">
-  <div class="img-bar">FILE <b>Octopus_cyanea_camouflage.jpg</b>  800×533  CC BY</div>
+  <div class="img-top"><b>Octopus_cyanea_camouflage.jpg</b>&nbsp;&nbsp;800x533&nbsp;&nbsp;CC BY</div>
   <img
     src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Octopus_cyanea_camouflage.jpg/800px-Octopus_cyanea_camouflage.jpg"
     alt="Octopus cyanea kamouflerar sig mot korallrevet"
     width="800" height="533" loading="lazy"
   >
-  <div class="img-cap">Octopus cyanea kamouflerad mot rev. Foto: prilfish</div>
+  <div class="img-bot"><span>Octopus cyanea kamouflerad mot rev. Foto: prilfish</span></div>
 </div>
 
 <p>
   Paradoxalt nog verkar bläckfiskar vara <em>färgblinda</em> — de har bara en
-  typ av fotoreceptor. En hypotes är att de utnyttjar kromatisk aberration i
-  linsen för att ändå uppfatta färgskillnader.
+  typ av fotoreceptor. En hypotes: de utnyttjar kromatisk aberration i linsen
+  för att ändå uppfatta färgskillnader.
 </p>
 
 <!-- ══════════════════════════════════════════════════════════ -->
@@ -418,8 +409,8 @@
 </p>
 
 <pre class="art art-text">
-  DJUPZON-FÖRDELNING
-  ───────────────────────────────────────────
+  DJUPZON-FORDELNING
+  ──────────────────────────────────────────
 
      0 m   ████████████████████████████████  Tidvattenzon
    200 m   ████████████████████████          Epipelagisk
@@ -435,7 +426,7 @@
 <footer>
   <span class="foot-rule"></span>
   <p>ZAARINFO  ·  textbaserat  ·  snabbt  ·  fritt</p>
-  <p>Källa: Wikipedia — Octopus (CC BY-SA)</p>
+  <p>Kalla: Wikipedia — Octopus (CC BY-SA)</p>
   <p>Senast uppdaterad: 2026-04-04</p>
 </footer>
 
