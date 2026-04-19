@@ -169,40 +169,83 @@
   const statsEl    = document.getElementById('stats');
 
   const KEY = 'zaarinfo-notes-v1';
-  let timer = null;
+  let timer   = null;
+  let synced  = false; // har vi lyckats nå servern?
 
-  // Läs sparat innehåll
-  const stored = localStorage.getItem(KEY);
-  if (stored !== null) editor.value = stored;
-  updateStats();
-  if (stored !== null) markSaved();
+  // ── UI-tillstånd ────────────────────────────────────────────
+  function stamp() {
+    return new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+  }
+  function markSynced() {
+    saveStatus.textContent = '● synkad';
+    saveStatus.className   = 'st-saved';
+    saveTime.textContent   = stamp();
+    synced = true;
+  }
+  function markSyncing() {
+    saveStatus.textContent = '↑ synkar';
+    saveStatus.className   = 'st-unsaved';
+    saveTime.textContent   = '';
+  }
+  function markUnsaved() {
+    saveStatus.textContent = '○ osparad';
+    saveStatus.className   = 'st-unsaved';
+    saveTime.textContent   = '';
+  }
+  function markLocal() {
+    saveStatus.textContent = '⚠ lokalt';
+    saveStatus.className   = 'st-unsaved';
+    saveTime.textContent   = stamp();
+  }
 
-  // ── Funktioner ─────────────────────────────────────────────
   function updateStats() {
-    const v = editor.value;
+    const v     = editor.value;
     const chars = v.length;
     const lines = v === '' ? 0 : v.split('\n').length;
     statsEl.textContent = chars + ' tecken  ' + lines + ' rader';
   }
 
-  function markSaved() {
-    const t = new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-    saveStatus.textContent = '● sparad';
-    saveStatus.className = 'st-saved';
-    saveTime.textContent = t;
+  // ── Ladda innehåll (server → localStorage → tomt) ──────────
+  async function load() {
+    // Visa localStorage direkt så det inte blinkar tomt
+    const cached = localStorage.getItem(KEY);
+    if (cached !== null) editor.value = cached;
+    updateStats();
+
+    try {
+      const res  = await fetch('/api/notes');
+      if (!res.ok) throw new Error(res.status);
+      const data = await res.json();
+      // Använd serverns version (den är auktoritativ)
+      editor.value = data.content;
+      localStorage.setItem(KEY, data.content);
+      updateStats();
+      markSynced();
+    } catch {
+      // Server ej tillgänglig — visa vad localStorage har
+      if (cached !== null) markLocal();
+    }
   }
 
-  function markUnsaved() {
-    saveStatus.textContent = '○ osparad';
-    saveStatus.className = 'st-unsaved';
-    saveTime.textContent = '';
+  // ── Spara (server + localStorage) ───────────────────────────
+  async function save() {
+    const content = editor.value;
+    localStorage.setItem(KEY, content);           // alltid lokalt
+    markSyncing();
+    try {
+      const res = await fetch('/api/notes', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ content })
+      });
+      if (!res.ok) throw new Error(res.status);
+      markSynced();
+    } catch {
+      markLocal();                                 // server nere, sparad lokalt
+    }
   }
 
-  function saveLocal() {
-    localStorage.setItem(KEY, editor.value);
-    markSaved();
-  }
-
+  // ── Ladda ner som .txt ───────────────────────────────────────
   function downloadTxt() {
     const blob = new Blob([editor.value], { type: 'text/plain;charset=utf-8' });
     const url  = URL.createObjectURL(blob);
@@ -215,16 +258,15 @@
     URL.revokeObjectURL(url);
   }
 
-  // ── Händelser ───────────────────────────────────────────────
+  // ── Händelser ────────────────────────────────────────────────
   editor.addEventListener('input', () => {
     markUnsaved();
     updateStats();
     clearTimeout(timer);
-    timer = setTimeout(saveLocal, 800);
+    timer = setTimeout(save, 800);
   });
 
   editor.addEventListener('keydown', e => {
-    // Tab → 4 mellanslag
     if (e.key === 'Tab') {
       e.preventDefault();
       const s = editor.selectionStart;
@@ -233,19 +275,20 @@
       editor.selectionStart = editor.selectionEnd = s + 4;
       editor.dispatchEvent(new Event('input'));
     }
-    // Ctrl/Cmd+S → ladda ner
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
       downloadTxt();
     }
   });
 
-  // Spara innan sidan stängs (om det finns osparade ändringar)
+  // Nödspara lokalt om fliken stängs med osparade ändringar
   window.addEventListener('beforeunload', () => {
     if (saveStatus.className === 'st-unsaved') {
       localStorage.setItem(KEY, editor.value);
     }
   });
+
+  load();
 </script>
 
 </body>
