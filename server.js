@@ -4,7 +4,8 @@ const path    = require('path');
 
 const app        = express();
 const PORT       = process.env.PORT || 3000;
-const NOTES_FILE = path.join(__dirname, 'notes.txt');
+const DATA_DIR   = process.env.DATA_DIR || __dirname;
+const NOTES_FILE = path.join(DATA_DIR, 'notes.txt');
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(__dirname));
