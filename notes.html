@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZAARINFO — Anteckningar</title>
+  <style>
+    :root {
+      --bg:        #111111;
+      --bg-raised: #1c1c1c;
+      --border:    #2c2c2c;
+      --dim:       #828282;
+      --text:      #c0c0c0;
+      --bright:    #e8e8e8;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    html::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent 0px, transparent 1px,
+        rgba(0,0,0,0.03) 1px, rgba(0,0,0,0.03) 2px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    body {
+      height: 100%;
+      max-width: 80ch;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ─────────────────────────────────────────────────── */
+    nav {
+      padding: 0.8rem 0 0.65rem;
+      font-size: 0.82rem;
+      color: var(--dim);
+      white-space: nowrap;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    nav a          { color: var(--text); text-decoration: none; }
+    nav a:hover    { color: var(--bright); text-decoration: underline; }
+    nav a.active   { color: var(--bright); }
+    .sep           { margin: 0 0.6ch; color: var(--border); }
+
+    /* ── STATUSBAR ───────────────────────────────────────────── */
+    .statusbar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      font-size: 0.76rem;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 0.3rem 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    #save-status { flex-shrink: 0; }
+    .sb-sep      { margin: 0 1.2ch; color: var(--border); flex-shrink: 0; }
+    #save-time   { flex-shrink: 0; color: var(--dim); }
+    .sb-gap      { flex: 1; }
+    #stats       { flex-shrink: 0; color: var(--dim); }
+
+    .st-saved   { color: var(--text); }
+    .st-unsaved { color: var(--dim); }
+
+    /* ── EDITOR ──────────────────────────────────────────────── */
+    .editor-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0; /* nödvändigt för flex overflow */
+    }
+
+    textarea {
+      flex: 1;
+      width: 100%;
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: inherit;
+      line-height: inherit;
+      border: none;
+      outline: none;
+      resize: none;
+      padding: 0.85rem 0;
+      caret-color: var(--bright);
+    }
+
+    textarea::placeholder { color: var(--border); }
+
+    textarea::selection {
+      background: rgba(192, 192, 192, 0.15);
+    }
+
+    ::-webkit-scrollbar       { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+
+    /* ── HINTBAR ─────────────────────────────────────────────── */
+    .hintbar {
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      padding: 0.3rem 0;
+      font-size: 0.72rem;
+      color: var(--dim);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0 2ch;
+      padding-bottom: env(safe-area-inset-bottom, 0.5rem);
+    }
+    .hintbar span { white-space: nowrap; }
+    .hintbar b    { color: var(--text); font-weight: normal; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span style="color:var(--dim)">~/notes&nbsp;$&nbsp;</span><a href="index.html">hem</a><span class="sep">/</span><a href="#">artiklar</a><span class="sep">/</span><a href="#">sök</a><span class="sep">/</span><a href="notes.html" class="active">anteckningar</a>
+</nav>
+
+<div class="statusbar">
+  <span id="save-status" class="st-saved">● sparad</span>
+  <span class="sb-sep">·</span>
+  <span id="save-time"></span>
+  <span class="sb-gap"></span>
+  <span id="stats">0 tecken  0 rader</span>
+</div>
+
+<div class="editor-wrap">
+  <textarea
+    id="editor"
+    spellcheck="false"
+    autocomplete="off"
+    autocorrect="off"
+    autocapitalize="off"
+    placeholder="_"
+  ></textarea>
+</div>
+
+<div class="hintbar">
+  <span>autospar <b>0.8s</b></span>
+  <span><b>ctrl+s</b> ladda ner .txt</span>
+  <span><b>tab</b> → 4 sp</span>
+</div>
+
+<script>
+  const editor     = document.getElementById('editor');
+  const saveStatus = document.getElementById('save-status');
+  const saveTime   = document.getElementById('save-time');
+  const statsEl    = document.getElementById('stats');
+
+  const KEY = 'zaarinfo-notes-v1';
+  let timer = null;
+
+  // Läs sparat innehåll
+  const stored = localStorage.getItem(KEY);
+  if (stored !== null) editor.value = stored;
+  updateStats();
+  if (stored !== null) markSaved();
+
+  // ── Funktioner ─────────────────────────────────────────────
+  function updateStats() {
+    const v = editor.value;
+    const chars = v.length;
+    const lines = v === '' ? 0 : v.split('\n').length;
+    statsEl.textContent = chars + ' tecken  ' + lines + ' rader';
+  }
+
+  function markSaved() {
+    const t = new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+    saveStatus.textContent = '● sparad';
+    saveStatus.className = 'st-saved';
+    saveTime.textContent = t;
+  }
+
+  function markUnsaved() {
+    saveStatus.textContent = '○ osparad';
+    saveStatus.className = 'st-unsaved';
+    saveTime.textContent = '';
+  }
+
+  function saveLocal() {
+    localStorage.setItem(KEY, editor.value);
+    markSaved();
+  }
+
+  function downloadTxt() {
+    const blob = new Blob([editor.value], { type: 'text/plain;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'anteckningar.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // ── Händelser ───────────────────────────────────────────────
+  editor.addEventListener('input', () => {
+    markUnsaved();
+    updateStats();
+    clearTimeout(timer);
+    timer = setTimeout(saveLocal, 800);
+  });
+
+  editor.addEventListener('keydown', e => {
+    // Tab → 4 mellanslag
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = editor.selectionStart;
+      const d = editor.selectionEnd;
+      editor.value = editor.value.slice(0, s) + '    ' + editor.value.slice(d);
+      editor.selectionStart = editor.selectionEnd = s + 4;
+      editor.dispatchEvent(new Event('input'));
+    }
+    // Ctrl/Cmd+S → ladda ner
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      downloadTxt();
+    }
+  });
+
+  // Spara innan sidan stängs (om det finns osparade ändringar)
+  window.addEventListener('beforeunload', () => {
+    if (saveStatus.className === 'st-unsaved') {
+      localStorage.setItem(KEY, editor.value);
+    }
+  });
+</script>
+
+</body>
+</html>
