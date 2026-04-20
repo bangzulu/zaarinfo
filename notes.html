@@ -168,17 +168,9 @@
   const saveTime   = document.getElementById('save-time');
   const statsEl    = document.getElementById('stats');
 
-  const KEY       = 'zaarinfo-notes-v1';
-  const TOKEN_KEY = 'zaarinfo-token';
-  let timer = null;
-
-  function getToken() { return localStorage.getItem(TOKEN_KEY) || ''; }
-  function apiHeaders() {
-    const h = { 'Content-Type': 'application/json' };
-    const t = getToken();
-    if (t) h['Authorization'] = 'Bearer ' + t;
-    return h;
-  }
+  const KEY   = 'zaarinfo-notes-v1';
+  const HDRS  = { 'Content-Type': 'application/json' };
+  let timer   = null;
 
   // ── UI-tillstånd ────────────────────────────────────────────
   function stamp() {
@@ -220,8 +212,7 @@
     updateStats();
 
     try {
-      const res = await fetch('/api/notes', { headers: apiHeaders() });
-      if (res.status === 401) { promptToken(); return; }
+      const res = await fetch('/api/notes');
       if (!res.ok) throw new Error(res.status);
       const data = await res.json();
       editor.value = data.content;
@@ -233,11 +224,6 @@
     }
   }
 
-  function promptToken() {
-    const t = window.prompt('Åtkomstnyckel:');
-    if (t) { localStorage.setItem(TOKEN_KEY, t); load(); }
-  }
-
   async function save() {
     const content = editor.value;
     localStorage.setItem(KEY, content);
@@ -245,10 +231,9 @@
     try {
       const res = await fetch('/api/notes', {
         method:  'POST',
-        headers: apiHeaders(),
+        headers: HDRS,
         body:    JSON.stringify({ content })
       });
-      if (res.status === 401) { promptToken(); return; }
       if (!res.ok) throw new Error(res.status);
       markSynced();
     } catch {
